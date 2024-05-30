@@ -1,28 +1,33 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Flex, Heading, Button, Spacer } from "@chakra-ui/react";
 import AddPartForm from "./components/AddPartForm";
 import Configurator from "./components/Configurator";
 
 const App = () => {
   return (
     <Router>
-      <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/add">Dodaj Podzespół</Link>
-            </li>
-            <li>
-              <Link to="/configurator">Konfigurator Podzespołów</Link>
-            </li>
-          </ul>
-        </nav>
-        <h1>Sklep z Podzespołami Komputerowymi</h1>
+      <Flex direction="column" alignItems="center" p={4}>
+        <Heading size="lg" mb={4}>
+          Sklep z Podzespołami Komputerowymi
+        </Heading>
+        <Flex alignItems="center" mb={4}>
+          <Link to="/add">
+            <Button colorScheme="blue" variant="outline" mx={2}>
+              Dodaj Podzespół
+            </Button>
+          </Link>
+          <Link to="/configurator">
+            <Button colorScheme="blue" variant="outline" mx={2}>
+              Konfigurator Podzespołów
+            </Button>
+          </Link>
+        </Flex>
         <Routes>
           <Route path="/add" element={<AddPartForm />} />
           <Route path="/configurator" element={<Configurator />} />
         </Routes>
-      </div>
+      </Flex>
     </Router>
   );
 };

@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  Box,
+  Text,
+  Flex,
+  Button,
+} from "@chakra-ui/react";
+import "./Configurator.css"; // Importowanie pliku CSS
 
 const Configurator = () => {
   const [partsByCategory, setPartsByCategory] = useState({});
   const [selectedParts, setSelectedParts] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0); // Nowy stan dla całkowitej ceny
 
   useEffect(() => {
     const fetchParts = async () => {
@@ -51,32 +63,67 @@ const Configurator = () => {
     }
   };
 
+  const flattenParts = () => {
+    return Object.values(partsByCategory).flatMap((parts) => parts);
+  };
+
+  // Funkcja do obliczania całkowitej ceny
+  const calculateTotalPrice = () => {
+    let total = 0;
+    flattenParts().forEach((part) => {
+      const selectedQuantity = selectedParts[part._id] || 0;
+      total += part.price * parseInt(selectedQuantity);
+    });
+    return total.toFixed(2); // Zaokrąglamy do dwóch miejsc po przecinku
+  };
+
+  // Aktualizujemy całkowitą cenę po zmianie wybranych podzespołów
+  useEffect(() => {
+    setTotalPrice(calculateTotalPrice());
+  }, [selectedParts, partsByCategory]);
+
   return (
-    <div>
-      <h1>Konfigurator Podzespołów</h1>
+    <div className="container">
+      <h1 className="title">Konfigurator Podzespołów</h1>
       <form onSubmit={handleSubmit}>
-        {/* Generowanie listy rozwijanej dla każdej kategorii */}
-        {Object.entries(partsByCategory).map(([category, parts]) => (
-          <div key={category}>
-            <h2>{category}</h2>
-            {parts.map((part) => (
-              <div key={part._id}>
-                <label>
-                  {part.name} - {part.quantity} szt.:
-                </label>
-                <input
-                  type="number"
-                  name={part._id}
-                  value={selectedParts[part._id] || ""}
-                  onChange={handleSelectChange}
-                  min="0"
-                  max={part.quantity}
-                />
-              </div>
-            ))}
-          </div>
-        ))}
-        <button type="submit">Zatwierdź</button>
+        <Accordion allowMultiple>
+          {Object.entries(partsByCategory).map(([category, parts]) => (
+            <AccordionItem key={category}>
+              <h2>
+                <AccordionButton className="accordion-button">
+                  {category}
+                </AccordionButton>
+              </h2>
+              <AccordionPanel className="accordion-panel">
+                {parts.map((part) => (
+                  <Flex key={part._id} className="item" alignItems="center">
+                    <Text>
+                      {part.name} - {part.quantity} szt.:
+                    </Text>
+                    <input
+                      type="number"
+                      name={part._id}
+                      value={selectedParts[part._id] || ""}
+                      onChange={handleSelectChange}
+                      min="0"
+                      max={part.quantity}
+                    />
+                  </Flex>
+                ))}
+              </AccordionPanel>
+            </AccordionItem>
+          ))}
+        </Accordion>
+        <div className="total-price">Całkowita cena: {totalPrice} zł</div>
+        <Button
+          type="submit"
+          colorScheme="blue"
+          variant="solid"
+          size="lg"
+          mt={4}
+        >
+          Zatwierdź
+        </Button>
       </form>
     </div>
   );

@@ -42,23 +42,24 @@ router.post("/", async (req, res) => {
 
 // Zmniejszanie ilości podzespołów
 router.post("/reduce", async (req, res) => {
-  const { id, quantity } = req.body;
+  const { parts } = req.body;
 
   try {
-    let part = await Part.findById(id);
+    for (let partData of parts) {
+      const part = await Part.findById(partData.id);
 
-    if (part && part.quantity >= quantity) {
-      part.quantity -= quantity;
-      part = await part.save();
-      res.status(200).json(part);
-    } else {
-      res
-        .status(400)
-        .json({
-          message:
-            "Nie można zmniejszyć ilości, niewystarczająca ilość w magazynie.",
-        });
+      if (part && part.quantity >= partData.quantity) {
+        part.quantity -= partData.quantity;
+        await part.save();
+      } else {
+        return res
+          .status(400)
+          .json({
+            message: `Nie można zmniejszyć ilości dla podzespołu ${part.name}, niewystarczająca ilość w magazynie.`,
+          });
+      }
     }
+    res.status(200).json({ message: "Podzespoły zaktualizowane pomyślnie!" });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
